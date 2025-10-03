@@ -2,7 +2,28 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
-import { Post } from '@prisma/client';
+// import { Post } from '@prisma/client';
+
+// Define Post type locally
+interface User {
+  id: number;
+  email: string;
+  name: string;
+  password: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+interface Post {
+  id: number;
+  title: string;
+  desc: string;
+  active: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+  userId: number;
+  user: User;
+}
 
 @Injectable()
 export class PostsService {

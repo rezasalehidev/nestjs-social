@@ -15,14 +15,29 @@ import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
+interface User {
+  id: number;
+  email: string;
+  name: string;
+  password: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 @Controller('posts')
 @UseGuards(JwtAuthGuard)
 export class PostsController {
   constructor(private readonly postsService: PostsService) {}
 
   @Post()
-  create(@Body() createPostDto: CreatePostDto, @Req() req) {
-    return this.postsService.create(createPostDto, req.user.id as number);
+  create(
+    @Body() createPostDto: CreatePostDto,
+    @Req()
+    req: Request & {
+      user: User;
+    },
+  ) {
+    return this.postsService.create(createPostDto, req.user.id);
   }
 
   @Get()
