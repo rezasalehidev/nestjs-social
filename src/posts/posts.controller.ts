@@ -18,14 +18,24 @@ import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { User } from '@prisma/client';
+import {
+  PostsControllerDecorators,
+  CreatePostDecorators,
+  FindAllPostsDecorators,
+  FindOnePostDecorators,
+  UpdatePostDecorators,
+  DeletePostDecorators,
+} from './posts-swagger.decorators';
 
 @Controller('posts')
 @UseGuards(JwtAuthGuard)
+@PostsControllerDecorators()
 export class PostsController {
   constructor(private readonly postsService: PostsService) {}
 
   @Post()
   @UseInterceptors(FileInterceptor('image'))
+  @CreatePostDecorators()
   create(
     @Body() createPostDto: CreatePostDto,
     @UploadedFile() image: Express.Multer.File,
@@ -38,16 +48,19 @@ export class PostsController {
   }
 
   @Get()
+  @FindAllPostsDecorators()
   findAll() {
     return this.postsService.findAll();
   }
 
   @Get(':id')
+  @FindOnePostDecorators()
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.postsService.findOne(id);
   }
 
   @Patch(':id')
+  @UpdatePostDecorators()
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updatePostDto: UpdatePostDto,
@@ -56,6 +69,7 @@ export class PostsController {
   }
 
   @Delete(':id')
+  @DeletePostDecorators()
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.postsService.remove(id);
   }
