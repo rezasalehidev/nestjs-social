@@ -1,4 +1,6 @@
 import { Module } from '@nestjs/common';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { PrismaModule } from './prisma/prisma.module';
@@ -7,7 +9,16 @@ import { AuthModule } from './auth/auth.module';
 import { PostsModule } from './posts/posts.module';
 
 @Module({
-  imports: [PrismaModule, UsersModule, AuthModule, PostsModule],
+  imports: [
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'uploads'),
+      serveRoot: '/uploads',
+    }),
+    PrismaModule,
+    UsersModule,
+    AuthModule,
+    PostsModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })

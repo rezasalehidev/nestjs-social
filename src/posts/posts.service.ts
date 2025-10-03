@@ -4,6 +4,8 @@ import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { Post } from '@prisma/client';
 import { PrismaClient } from '@prisma/client';
+import * as fs from 'fs';
+import * as path from 'path';
 
 const prisma = new PrismaClient();
 
@@ -11,12 +13,29 @@ const prisma = new PrismaClient();
 export class PostsService {
   constructor(private prisma: PrismaService) {}
 
-  async create(createPostDto: CreatePostDto, userId: number): Promise<Post> {
+  async create(
+    createPostDto: CreatePostDto,
+    userId: number,
+    image?: Express.Multer.File,
+  ): Promise<Post> {
+    let imagePath: string | undefined;
+
+    if (image) {
+      const uploadsDir = path.join(process.cwd(), 'uploads');
+      if (!fs.existsSync(uploadsDir)) {
+        fs.mkdirSync(uploadsDir, { recursive: true });
+      }
+      const fileName = `${Date.now()}-${image.originalname}`;
+      imagePath = path.join('uploads', fileName);
+      fs.writeFileSync(path.join(uploadsDir, fileName), image.buffer);
+    }
+
     return await prisma.post.create({
       data: {
         title: createPostDto.title,
         desc: createPostDto.desc,
-        active: createPostDto.active ?? true,
+        image: imagePath,
+        active: createPostDto.active ? createPostDto.active === 'true' : true,
         userId,
       },
     });
@@ -40,10 +59,15 @@ export class PostsService {
   }
 
   async update(id: number, updatePostDto: UpdatePostDto): Promise<Post> {
+    const updateData: any = { ...updatePostDto };
+    if (updatePostDto.active !== undefined) {
+      updateData.active = updatePostDto.active === 'true';
+    }
+
     try {
       return await prisma.post.update({
         where: { id },
-        data: updatePostDto,
+        data: updateData,
         include: { user: true },
       });
     } catch {
