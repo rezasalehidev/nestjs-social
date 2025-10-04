@@ -9,6 +9,7 @@ import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { PostsModule } from './posts/posts.module';
 import { CacheModule } from './cache/cache.module';
+import { CommentsModule } from './comments/comments.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { CacheModule } from './cache/cache.module';
     AuthModule,
     PostsModule,
     CacheModule,
+    CommentsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
