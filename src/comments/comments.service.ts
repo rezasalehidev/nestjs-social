@@ -1,11 +1,11 @@
 import { Injectable, NotFoundException, Inject } from '@nestjs/common';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import type { Cache } from 'cache-manager';
-import { PrismaService } from '../prisma/prisma.service';
-import { CreateCommentDto } from './dto/create-comment.dto';
-import { UpdateCommentDto } from './dto/update-comment.dto';
+import { PrismaService } from '@/prisma/prisma.service';
+import { CreateCommentDto } from '@/comments/dto/create-comment.dto';
+import { UpdateCommentDto } from '@/comments/dto/update-comment.dto';
 import { Comment } from '@prisma/client';
-import { ReactionsService } from '../reactions/reactions.service';
+import { ReactionsService } from '@/reactions/reactions.service';
 
 @Injectable()
 export class CommentsService {

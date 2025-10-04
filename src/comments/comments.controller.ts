@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/require-await */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 import {
   Controller,
@@ -17,16 +18,16 @@ import {
   ApiResponse,
   ApiBearerAuth,
 } from '@nestjs/swagger';
-import { JwtAuthGuard } from '../auth/guards';
-import { CommentsService } from './comments.service';
-import { CreateCommentDto } from './dto/create-comment.dto';
-import { UpdateCommentDto } from './dto/update-comment.dto';
-import { ReactionsService } from '../reactions/reactions.service';
+import { JwtAuthGuard } from '@/auth/guards';
+import { CommentsService } from '@/comments/comments.service';
+import { CreateCommentDto } from '@/comments/dto/create-comment.dto';
+import { UpdateCommentDto } from '@/comments/dto/update-comment.dto';
+import { ReactionsService } from '@/reactions/reactions.service';
 import {
   LikeCommentDecorators,
   UnlikeCommentDecorators,
   GetCommentReactionCountDecorators,
-} from '../reactions/reactions-swagger.decorators';
+} from '@/reactions/reactions-swagger.decorators';
 
 @ApiTags('comments')
 @Controller('comments')

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
 import {
   Controller,
   Get,
@@ -13,12 +14,12 @@ import {
   UploadedFile,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { PostsService } from './posts.service';
-import { CreatePostDto } from './dto/create-post.dto';
-import { UpdatePostDto } from './dto/update-post.dto';
-import { JwtAuthGuard } from '../auth/guards';
+import { PostsService } from '@/posts/posts.service';
+import { CreatePostDto } from '@/posts/dto/create-post.dto';
+import { UpdatePostDto } from '@/posts/dto/update-post.dto';
+import { JwtAuthGuard } from '@/auth/guards';
 import { User } from '@prisma/client';
-import { ReactionsService } from '../reactions/reactions.service';
+import { ReactionsService } from '@/reactions/reactions.service';
 import {
   PostsControllerDecorators,
   CreatePostDecorators,
@@ -26,12 +27,12 @@ import {
   FindOnePostDecorators,
   UpdatePostDecorators,
   DeletePostDecorators,
-} from './posts-swagger.decorators';
+} from '@/posts/posts-swagger.decorators';
 import {
   LikePostDecorators,
   UnlikePostDecorators,
   GetPostReactionCountDecorators,
-} from '../reactions/reactions-swagger.decorators';
+} from '@/reactions/reactions-swagger.decorators';
 @Controller('posts')
 @UseGuards(JwtAuthGuard)
 @PostsControllerDecorators()

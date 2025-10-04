@@ -1,12 +1,12 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
-import { CreatePostDto } from './dto/create-post.dto';
-import { UpdatePostDto } from './dto/update-post.dto';
+import { PrismaService } from '@/prisma/prisma.service';
+import { CreatePostDto } from '@/posts/dto/create-post.dto';
+import { UpdatePostDto } from '@/posts/dto/update-post.dto';
 import { Post } from '@prisma/client';
 import { PrismaClient } from '@prisma/client';
 import * as fs from 'fs';
 import * as path from 'path';
-import { ReactionsService } from '../reactions/reactions.service';
+import { ReactionsService } from '@/reactions/reactions.service';
 
 const prisma = new PrismaClient();
 

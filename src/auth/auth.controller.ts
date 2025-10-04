@@ -1,13 +1,13 @@
 import { Controller, Request, Post, UseGuards, Body } from '@nestjs/common';
-import { AuthService } from './auth.service';
-import { UsersService } from '../users/users.service';
-import { CreateUserDto } from '../users/dto/create-user.dto';
-import { LocalAuthGuard } from './guards';
+import { AuthService } from '@/auth/auth.service';
+import { UsersService } from '@/users/users.service';
+import { CreateUserDto } from '@/users/dto/create-user.dto';
+import { LocalAuthGuard } from '@/auth/guards';
 import {
   AuthControllerDecorators,
   LoginDecorators,
   SignupDecorators,
-} from './auth-swagger.decorators';
+} from '@/auth/auth-swagger.decorators';
 
 @Controller('auth')
 @AuthControllerDecorators()
