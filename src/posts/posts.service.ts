@@ -6,12 +6,16 @@ import { Post } from '@prisma/client';
 import { PrismaClient } from '@prisma/client';
 import * as fs from 'fs';
 import * as path from 'path';
+import { ReactionsService } from '../reactions/reactions.service';
 
 const prisma = new PrismaClient();
 
 @Injectable()
 export class PostsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private reactionsService: ReactionsService,
+  ) {}
 
   async create(
     createPostDto: CreatePostDto,
@@ -41,13 +45,28 @@ export class PostsService {
     });
   }
 
-  async findAll(): Promise<Post[]> {
-    return await prisma.post.findMany({
+  async findAll(): Promise<any[]> {
+    const posts = await prisma.post.findMany({
       include: { user: true },
     });
+
+    // Add reaction counts to each post
+    const postsWithReactions = await Promise.all(
+      posts.map(async (post) => {
+        const reactionCount = await this.reactionsService.getReactionCount(
+          post.id,
+        );
+        return {
+          ...post,
+          reactionCount,
+        };
+      }),
+    );
+
+    return postsWithReactions;
   }
 
-  async findOne(id: number): Promise<Post> {
+  async findOne(id: number): Promise<any> {
     const post = await prisma.post.findUnique({
       where: { id },
       include: { user: true },
@@ -55,7 +74,12 @@ export class PostsService {
     if (!post) {
       throw new NotFoundException(`Post with ID ${id} not found`);
     }
-    return post;
+
+    const reactionCount = await this.reactionsService.getReactionCount(id);
+    return {
+      ...post,
+      reactionCount,
+    };
   }
 
   async update(id: number, updatePostDto: UpdatePostDto): Promise<Post> {

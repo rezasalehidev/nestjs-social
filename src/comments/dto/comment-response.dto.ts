@@ -17,21 +17,12 @@ export class UserResponseDto {
   updatedAt?: Date;
 }
 
-export class PostResponseDto {
+export class CommentResponseDto {
   @ApiProperty({ example: 1 })
   id: number;
 
-  @ApiProperty({ example: 'Post Title' })
-  title: string;
-
-  @ApiProperty({ example: 'Post description' })
-  desc: string;
-
-  @ApiPropertyOptional({ example: 'path/to/image.jpg' })
-  image?: string;
-
-  @ApiProperty({ example: true })
-  active: boolean;
+  @ApiProperty({ example: 'This is a comment' })
+  content: string;
 
   @ApiPropertyOptional({ example: '2023-01-01T00:00:00.000Z' })
   createdAt?: Date;
@@ -39,12 +30,27 @@ export class PostResponseDto {
   @ApiPropertyOptional({ example: '2023-01-01T00:00:00.000Z' })
   updatedAt?: Date;
 
+  @ApiProperty({ example: 1 })
+  userId: number;
+
+  @ApiProperty({ example: 1 })
+  postId: number;
+
+  @ApiPropertyOptional({ example: 2 })
+  parentId?: number;
+
   @ApiProperty({ type: UserResponseDto })
   user: UserResponseDto;
 
+  @ApiPropertyOptional({ type: CommentResponseDto, isArray: true })
+  replies?: CommentResponseDto[];
+
+  @ApiPropertyOptional({ type: CommentResponseDto })
+  parent?: CommentResponseDto;
+
   @ApiProperty({
-    example: 10,
-    description: 'Number of reactions/likes on this post',
+    example: 5,
+    description: 'Number of reactions/likes on this comment',
   })
   reactionCount: number;
 }

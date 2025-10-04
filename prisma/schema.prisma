@@ -16,6 +16,7 @@ model User {
   updatedAt DateTime @updatedAt
   posts     Post[]
   comments  Comment[]
+  reactions Reaction[]
 }
 
 model Post {
@@ -29,6 +30,7 @@ model Post {
   userId    Int
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   comments  Comment[]
+  reactions Reaction[]
 }
 
 model Comment {
@@ -43,4 +45,21 @@ model Comment {
   post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
   parent    Comment? @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
   replies   Comment[] @relation("CommentReplies")
+  reactions Reaction[]
+}
+
+model Reaction {
+  id        Int      @id @default(autoincrement())
+  type      String   @default("like") // For future extensibility (like, love, etc.)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  userId    Int
+  postId    Int?
+  commentId Int?
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post      Post?    @relation(fields: [postId], references: [id], onDelete: Cascade)
+  comment   Comment? @relation(fields: [commentId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, postId]) // User can only react once per post
+  @@unique([userId, commentId]) // User can only react once per comment
 }

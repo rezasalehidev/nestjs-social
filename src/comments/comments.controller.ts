@@ -21,11 +21,20 @@ import { JwtAuthGuard } from '../auth/guards';
 import { CommentsService } from './comments.service';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
+import { ReactionsService } from '../reactions/reactions.service';
+import {
+  LikeCommentDecorators,
+  UnlikeCommentDecorators,
+  GetCommentReactionCountDecorators,
+} from '../reactions/reactions-swagger.decorators';
 
 @ApiTags('comments')
 @Controller('comments')
 export class CommentsController {
-  constructor(private readonly commentsService: CommentsService) {}
+  constructor(
+    private readonly commentsService: CommentsService,
+    private readonly reactionsService: ReactionsService,
+  ) {}
 
   @Post()
   @UseGuards(JwtAuthGuard)
@@ -99,5 +108,48 @@ export class CommentsController {
   @ApiResponse({ status: 404, description: 'Comment not found' })
   remove(@Param('id') id: string, @Request() req) {
     return this.commentsService.remove(parseInt(id), req.user.id);
+  }
+
+  // Reaction endpoints
+  @Post(':id/reactions')
+  @LikeCommentDecorators()
+  async likeComment(
+    @Param('id') commentId: string,
+    @Body() createReactionDto: { type?: string },
+    @Request() req,
+  ) {
+    return await this.reactionsService.create(
+      {
+        type: (createReactionDto.type as any) || 'like',
+        commentId: parseInt(commentId),
+      },
+      req.user.id,
+    );
+  }
+
+  @Delete(':id/reactions')
+  @UnlikeCommentDecorators()
+  async unlikeComment(@Param('id') commentId: string, @Request() req) {
+    await this.reactionsService.remove(
+      req.user.id,
+      undefined,
+      parseInt(commentId),
+    );
+    return { message: 'Reaction removed successfully' };
+  }
+
+  @Get(':id/reactions')
+  async getCommentReactions(@Param('id') commentId: string) {
+    return this.reactionsService.findByComment(parseInt(commentId));
+  }
+
+  @Get(':id/reactions/count')
+  @GetCommentReactionCountDecorators()
+  async getCommentReactionsCount(@Param('id') commentId: string) {
+    const count = await this.reactionsService.getReactionCount(
+      undefined,
+      parseInt(commentId),
+    );
+    return { count };
   }
 }

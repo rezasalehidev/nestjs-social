@@ -18,6 +18,7 @@ import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { JwtAuthGuard } from '../auth/guards';
 import { User } from '@prisma/client';
+import { ReactionsService } from '../reactions/reactions.service';
 import {
   PostsControllerDecorators,
   CreatePostDecorators,
@@ -26,12 +27,19 @@ import {
   UpdatePostDecorators,
   DeletePostDecorators,
 } from './posts-swagger.decorators';
-
+import {
+  LikePostDecorators,
+  UnlikePostDecorators,
+  GetPostReactionCountDecorators,
+} from '../reactions/reactions-swagger.decorators';
 @Controller('posts')
 @UseGuards(JwtAuthGuard)
 @PostsControllerDecorators()
 export class PostsController {
-  constructor(private readonly postsService: PostsService) {}
+  constructor(
+    private readonly postsService: PostsService,
+    private readonly reactionsService: ReactionsService,
+  ) {}
 
   @Post()
   @UseInterceptors(FileInterceptor('image'))
@@ -72,5 +80,44 @@ export class PostsController {
   @DeletePostDecorators()
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.postsService.remove(id);
+  }
+
+  // Reaction endpoints
+  @Post(':id/reactions')
+  @LikePostDecorators()
+  async likePost(
+    @Param('id', ParseIntPipe) postId: number,
+    @Body() createReactionDto: { type?: string },
+    @Req() req: Request & { user: User },
+  ) {
+    return await this.reactionsService.create(
+      {
+        type: (createReactionDto.type as any) || 'like',
+        postId,
+      },
+      req.user.id,
+    );
+  }
+
+  @Delete(':id/reactions')
+  @UnlikePostDecorators()
+  async unlikePost(
+    @Param('id', ParseIntPipe) postId: number,
+    @Req() req: Request & { user: User },
+  ) {
+    await this.reactionsService.remove(req.user.id, postId);
+    return { message: 'Reaction removed successfully' };
+  }
+
+  @Get(':id/reactions')
+  async getPostReactions(@Param('id', ParseIntPipe) postId: number) {
+    return await this.reactionsService.findByPost(postId);
+  }
+
+  @Get(':id/reactions/count')
+  @GetPostReactionCountDecorators()
+  async getPostReactionsCount(@Param('id', ParseIntPipe) postId: number) {
+    const count = await this.reactionsService.getReactionCount(postId);
+    return { count };
   }
 }

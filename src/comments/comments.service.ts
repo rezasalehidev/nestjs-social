@@ -5,12 +5,14 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
 import { Comment } from '@prisma/client';
+import { ReactionsService } from '../reactions/reactions.service';
 
 @Injectable()
 export class CommentsService {
   constructor(
     private prisma: PrismaService,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
+    private reactionsService: ReactionsService,
   ) {}
 
   async create(
@@ -80,10 +82,10 @@ export class CommentsService {
     return comment;
   }
 
-  async findAll(postId?: number): Promise<Comment[]> {
+  async findAll(postId?: number): Promise<any[]> {
     const where = postId ? { postId, parentId: null } : { parentId: null };
 
-    return await this.prisma.comment.findMany({
+    const comments = await this.prisma.comment.findMany({
       where,
       include: {
         user: {
@@ -103,9 +105,12 @@ export class CommentsService {
       },
       orderBy: { createdAt: 'desc' },
     });
+
+    // Add reaction counts to comments and their replies
+    return await this.addReactionCountsToComments(comments);
   }
 
-  async findOne(id: number): Promise<Comment> {
+  async findOne(id: number): Promise<any> {
     const comment = await this.prisma.comment.findUnique({
       where: { id },
       include: {
@@ -136,7 +141,11 @@ export class CommentsService {
       throw new NotFoundException('Comment not found');
     }
 
-    return comment;
+    // Add reaction count to the comment and its replies
+    const [commentWithReactions] = await this.addReactionCountsToComments([
+      comment,
+    ]);
+    return commentWithReactions;
   }
 
   async update(
@@ -228,8 +237,8 @@ export class CommentsService {
     return count;
   }
 
-  async findByPost(postId: number): Promise<Comment[]> {
-    return await this.prisma.comment.findMany({
+  async findByPost(postId: number): Promise<any[]> {
+    const comments = await this.prisma.comment.findMany({
       where: { postId, parentId: null }, // Only top-level comments
       include: {
         user: {
@@ -247,5 +256,30 @@ export class CommentsService {
       },
       orderBy: { createdAt: 'desc' },
     });
+
+    // Add reaction counts to comments and their replies
+    return await this.addReactionCountsToComments(comments);
+  }
+
+  private async addReactionCountsToComments(comments: any[]): Promise<any[]> {
+    return await Promise.all(
+      comments.map(async (comment) => {
+        const reactionCount = await this.reactionsService.getReactionCount(
+          undefined,
+          comment.id,
+        );
+
+        // Recursively add reaction counts to replies
+        const repliesWithReactions = comment.replies
+          ? await this.addReactionCountsToComments(comment.replies)
+          : [];
+
+        return {
+          ...comment,
+          reactionCount,
+          replies: repliesWithReactions,
+        };
+      }),
+    );
   }
 }

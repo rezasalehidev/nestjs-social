@@ -10,6 +10,7 @@ import { AuthModule } from './auth/auth.module';
 import { PostsModule } from './posts/posts.module';
 import { CacheModule } from './cache/cache.module';
 import { CommentsModule } from './comments/comments.module';
+import { ReactionsModule } from './reactions/reactions.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { CommentsModule } from './comments/comments.module';
     PostsModule,
     CacheModule,
     CommentsModule,
+    ReactionsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
