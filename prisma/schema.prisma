@@ -17,6 +17,8 @@ model User {
   posts     Post[]
   comments  Comment[]
   reactions Reaction[]
+  followers Follow[] @relation("Follower")
+  following Follow[] @relation("Following")
 }
 
 model Post {
@@ -62,4 +64,15 @@ model Reaction {
 
   @@unique([userId, postId]) // User can only react once per post
   @@unique([userId, commentId]) // User can only react once per comment
+}
+
+model Follow {
+  id          Int      @id @default(autoincrement())
+  followerId  Int
+  followingId Int
+  createdAt   DateTime @default(now())
+  follower    User     @relation("Follower", fields: [followerId], references: [id], onDelete: Cascade)
+  following   User     @relation("Following", fields: [followingId], references: [id], onDelete: Cascade)
+
+  @@unique([followerId, followingId]) // Prevent duplicate follows
 }

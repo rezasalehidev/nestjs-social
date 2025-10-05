@@ -15,4 +15,10 @@ export class UserResponseDto {
 
   @ApiPropertyOptional({ example: '2023-01-01T00:00:00.000Z' })
   updatedAt?: Date;
+
+  @ApiProperty({ example: 42 })
+  followerCount: number;
+
+  @ApiProperty({ example: 35 })
+  followingCount: number;
 }

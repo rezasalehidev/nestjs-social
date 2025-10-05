@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '@/prisma/prisma.service';
 import { CreateUserDto } from '@/users/dto/create-user.dto';
@@ -60,5 +59,75 @@ export class UsersService {
     } catch {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
+  }
+
+  async follow(followerId: number, followingId: number): Promise<void> {
+    if (followerId === followingId) {
+      throw new Error('Cannot follow yourself');
+    }
+
+    await this.prisma.follow.create({
+      data: {
+        followerId,
+        followingId,
+      },
+    });
+  }
+
+  async unfollow(followerId: number, followingId: number): Promise<void> {
+    await this.prisma.follow.delete({
+      where: {
+        followerId_followingId: {
+          followerId,
+          followingId,
+        },
+      },
+    });
+  }
+
+  async isFollowing(followerId: number, followingId: number): Promise<boolean> {
+    const follow = await this.prisma.follow.findUnique({
+      where: {
+        followerId_followingId: {
+          followerId,
+          followingId,
+        },
+      },
+    });
+    return !!follow;
+  }
+
+  async getFollowerCount(userId: number): Promise<number> {
+    return await this.prisma.follow.count({
+      where: { followingId: userId },
+    });
+  }
+
+  async getFollowingCount(userId: number): Promise<number> {
+    return await this.prisma.follow.count({
+      where: {
+        followerId: userId,
+      },
+    });
+  }
+
+  async getUserWithCounts(id: number) {
+    const user = await this.prisma.user.findUnique({
+      where: { id },
+    });
+    if (!user) {
+      throw new NotFoundException(`User with ID ${id} not found`);
+    }
+
+    const [followerCount, followingCount] = await Promise.all([
+      this.getFollowerCount(id),
+      this.getFollowingCount(id),
+    ]);
+
+    return {
+      ...user,
+      followerCount,
+      followingCount,
+    };
   }
 }

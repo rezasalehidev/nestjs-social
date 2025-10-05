@@ -8,11 +8,13 @@ import {
   Delete,
   ParseIntPipe,
   UseGuards,
+  Req,
 } from '@nestjs/common';
 import { UsersService } from '@/users/users.service';
 import { CreateUserDto } from '@/users/dto/create-user.dto';
 import { UpdateUserDto } from '@/users/dto/update-user.dto';
 import { JwtAuthGuard } from '@/auth/guards';
+import { User } from '@prisma/client';
 
 @Controller('users')
 export class UsersController {
@@ -31,8 +33,8 @@ export class UsersController {
 
   @UseGuards(JwtAuthGuard)
   @Get(':id')
-  findOne(@Param('id', ParseIntPipe) id: number) {
-    return this.usersService.findOne(id);
+  async findOne(@Param('id', ParseIntPipe) id: number) {
+    return await this.usersService.getUserWithCounts(id);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -48,5 +50,38 @@ export class UsersController {
   @Delete(':id')
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.usersService.remove(id);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post(':id/follow')
+  async follow(
+    @Param('id', ParseIntPipe) followingId: number,
+    @Req() req: Request & { user: User },
+  ) {
+    await this.usersService.follow(req.user.id, followingId);
+    return { message: 'Successfully followed user' };
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Delete(':id/follow')
+  async unfollow(
+    @Param('id', ParseIntPipe) followingId: number,
+    @Req() req: Request & { user: User },
+  ) {
+    await this.usersService.unfollow(req.user.id, followingId);
+    return { message: 'Successfully unfollowed user' };
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get(':id/following')
+  async isFollowing(
+    @Param('id', ParseIntPipe) followingId: number,
+    @Req() req: Request & { user: User },
+  ) {
+    const isFollowing = await this.usersService.isFollowing(
+      req.user.id,
+      followingId,
+    );
+    return { isFollowing };
   }
 }

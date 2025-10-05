@@ -109,4 +109,41 @@ export class PostsService {
       throw new NotFoundException(`Post with ID ${id} not found`);
     }
   }
+
+  async getFeed(userId: number): Promise<any[]> {
+    // Get users that the current user follows
+    const following = await this.prisma.follow.findMany({
+      where: { followerId: userId },
+      select: { followingId: true },
+    });
+
+    const followingIds = following.map((f) => f.followingId);
+
+    // Include the user's own posts in the feed
+    followingIds.push(userId);
+
+    const posts = await this.prisma.post.findMany({
+      where: {
+        userId: { in: followingIds },
+        active: true,
+      },
+      include: { user: true },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    // Add reaction counts to each post
+    const postsWithReactions = await Promise.all(
+      posts.map(async (post) => {
+        const reactionCount = await this.reactionsService.getReactionCount(
+          post.id,
+        );
+        return {
+          ...post,
+          reactionCount,
+        };
+      }),
+    );
+
+    return postsWithReactions;
+  }
 }

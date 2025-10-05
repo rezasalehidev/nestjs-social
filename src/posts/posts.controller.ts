@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
 import {
   Controller,
   Get,
@@ -60,6 +59,11 @@ export class PostsController {
   @FindAllPostsDecorators()
   findAll() {
     return this.postsService.findAll();
+  }
+
+  @Get('feed')
+  async getFeed(@Req() req: Request & { user: User }) {
+    return this.postsService.getFeed(req.user.id);
   }
 
   @Get(':id')
