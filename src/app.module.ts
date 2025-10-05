@@ -11,6 +11,7 @@ import { PostsModule } from '@/posts/posts.module';
 import { CacheModule } from './cache/cache.module';
 import { CommentsModule } from './comments/comments.module';
 import { ReactionsModule } from './reactions/reactions.module';
+import { SearchModule } from './search/search.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { ReactionsModule } from './reactions/reactions.module';
     CacheModule,
     CommentsModule,
     ReactionsModule,
+    SearchModule,
   ],
   controllers: [AppController],
   providers: [AppService],
