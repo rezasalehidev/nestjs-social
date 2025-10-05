@@ -6,6 +6,7 @@ import { CreateCommentDto } from '@/comments/dto/create-comment.dto';
 import { UpdateCommentDto } from '@/comments/dto/update-comment.dto';
 import { Comment } from '@prisma/client';
 import { ReactionsService } from '@/reactions/reactions.service';
+import { NotificationsService } from '@/notifications/notifications.service';
 
 @Injectable()
 export class CommentsService {
@@ -13,6 +14,7 @@ export class CommentsService {
     private prisma: PrismaService,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
     private reactionsService: ReactionsService,
+    private notificationsService: NotificationsService,
   ) {}
 
   async create(
@@ -77,6 +79,14 @@ export class CommentsService {
     // Invalidate comment count cache for this post
     await this.cacheManager.del(
       `post_${createCommentDto.postId}_comment_count`,
+    );
+
+    // Emit notification for new comment
+    await this.notificationsService.notifyComment(
+      userId,
+      createCommentDto.postId,
+      comment.id,
+      userId,
     );
 
     return comment;

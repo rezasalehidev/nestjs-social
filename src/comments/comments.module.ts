@@ -3,9 +3,10 @@ import { CommentsService } from '@/comments/comments.service';
 import { CommentsController } from '@/comments/comments.controller';
 import { CacheModule } from '@/cache/cache.module';
 import { ReactionsModule } from '@/reactions/reactions.module';
+import { NotificationsModule } from '@/notifications/notifications.module';
 
 @Module({
-  imports: [CacheModule, ReactionsModule],
+  imports: [CacheModule, ReactionsModule, NotificationsModule],
   controllers: [CommentsController],
   providers: [CommentsService],
   exports: [CommentsService],

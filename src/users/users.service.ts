@@ -4,10 +4,14 @@ import { CreateUserDto } from '@/users/dto/create-user.dto';
 import { UpdateUserDto } from '@/users/dto/update-user.dto';
 import { User } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
+import { NotificationsService } from '@/notifications/notifications.service';
 
 @Injectable()
 export class UsersService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private notificationsService: NotificationsService,
+  ) {}
 
   async create(createUserDto: CreateUserDto): Promise<User> {
     const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
@@ -72,6 +76,9 @@ export class UsersService {
         followingId,
       },
     });
+
+    // Emit notification for new follow
+    await this.notificationsService.notifyFollow(followerId, followingId);
   }
 
   async unfollow(followerId: number, followingId: number): Promise<void> {
@@ -83,6 +90,9 @@ export class UsersService {
         },
       },
     });
+
+    // Emit notification for unfollow
+    await this.notificationsService.notifyUnfollow(followerId, followingId);
   }
 
   async isFollowing(followerId: number, followingId: number): Promise<boolean> {

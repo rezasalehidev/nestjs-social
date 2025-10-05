@@ -4,9 +4,14 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { PrismaExceptionFilter } from './common/prisma-exception.filter';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { IoAdapter } from '@nestjs/platform-socket.io';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  // Enable WebSocket support
+  app.useWebSocketAdapter(new IoAdapter(app));
+
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,

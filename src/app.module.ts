@@ -12,6 +12,7 @@ import { CacheModule } from './cache/cache.module';
 import { CommentsModule } from './comments/comments.module';
 import { ReactionsModule } from './reactions/reactions.module';
 import { SearchModule } from './search/search.module';
+import { NotificationsModule } from './notifications/notifications.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { SearchModule } from './search/search.module';
     CommentsModule,
     ReactionsModule,
     SearchModule,
+    NotificationsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

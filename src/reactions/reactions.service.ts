@@ -10,6 +10,7 @@ import { PrismaClient } from '@prisma/client';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Inject } from '@nestjs/common';
 import type { Cache } from 'cache-manager';
+import { NotificationsService } from '../notifications/notifications.service';
 
 const prisma = new PrismaClient();
 
@@ -18,6 +19,7 @@ export class ReactionsService {
   constructor(
     private prisma: PrismaService,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
+    private notificationsService: NotificationsService,
   ) {}
 
   async create(
@@ -76,6 +78,14 @@ export class ReactionsService {
         },
       },
     });
+
+    // Emit notification for new like
+    if (createReactionDto.postId) {
+      await this.notificationsService.notifyLike(
+        createReactionDto.postId,
+        userId,
+      );
+    }
 
     // Invalidate cache for reaction counts
     await this.invalidateReactionCountCache(
