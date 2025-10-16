@@ -84,4 +84,10 @@ export class UsersController {
     );
     return { isFollowing };
   }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('profile')
+  async getProfile(@Req() req: Request & { user: User }) {
+    return await this.usersService.getUserWithCounts(req.user.id);
+  }
 }

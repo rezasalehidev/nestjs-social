@@ -19,6 +19,7 @@ export class AuthController {
 
   @UseGuards(LocalAuthGuard)
   @Post('login')
+  // swagger login
   @LoginDecorators()
   login(@Request() req) {
     return this.authService.login(req.user);
